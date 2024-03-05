@@ -8,8 +8,17 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+	"time"
 )
+
+type State struct {
+	Dates        []string
+	Emails       []string
+	Votes        map[string]int
+	PollDuration time.Duration
+}
 
 func main() {
 	err := godotenv.Load()
@@ -17,6 +26,7 @@ func main() {
 		slog.Error("Error loading .env file", err)
 		return
 	}
+	state := State{}
 
 	discord, err := discordgo.New(fmt.Sprintf("Bot %s", os.Getenv("DISCORD_API_SECRET")))
 	if err != nil {
@@ -24,15 +34,36 @@ func main() {
 		return
 	}
 
+	discord.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
+	})
 	discord.AddHandler(messageCreate)
 	discord.Identify.Intents = discordgo.IntentsGuildMessages
 	discord.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+		fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
+		fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
+		if i.Type == discordgo.InteractionMessageComponent && i.MessageComponentData().CustomID == "vote_meeting_time" {
+			insertEmailForVoting(s, i)
+		} else if i.Type == discordgo.InteractionModalSubmit {
+			email := i.ModalSubmitData().Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+			state.Emails = append(state.Emails, email)
+			slog.Info("email added to responses", "email", email)
+			voteForMeeting(s, i, state)
+		} else if i.Type == discordgo.InteractionMessageComponent && i.MessageComponentData().CustomID == "date_selection" {
+			date := i.MessageComponentData().Values[0]
+			state.Votes[date] = state.Votes[date] + 1
+			slog.Info("vote cast for next meeting", "date", date, "voteCount", state.Votes[date])
+			completeVoting(s, i)
+		} else if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+			state.PollDuration = time.Duration(i.ApplicationCommandData().Options[2].IntValue()) * time.Second
+			state.Dates = strings.Split(i.ApplicationCommandData().Options[1].StringValue(), ",")
+			state.Votes = make(map[string]int, len(state.Dates))
+			for _, v := range state.Dates {
+				state.Votes[v] = 0
+			}
+
 			h(s, i)
 		}
-	})
-	discord.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
 
 	if err = discord.Open(); err != nil {
@@ -48,11 +79,19 @@ func main() {
 
 	slog.Info("discord bot generating commands...")
 	for _, v := range commands {
-		_, err = discord.ApplicationCommandCreate(discord.State.User.ID, "788203854038564886", v)
+		_, err = discord.ApplicationCommandCreate(discord.State.User.ID, "1214625037244432465", v)
 		if err != nil {
 			log.Panicf("Cannot create '%v' command: %v", v.Name, err)
 		}
 	}
+
+	time.AfterFunc(state.PollDuration, func() {
+		fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
+		fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
+		fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
+		//reset the state
+		state = State{}
+	})
 
 	slog.Info("discord bot listening...")
 	terminateOnSignal()

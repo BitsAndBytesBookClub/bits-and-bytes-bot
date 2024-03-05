@@ -15,8 +15,14 @@ var commands = []*discordgo.ApplicationCommand{
 			},
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
-				Name:        "date",
-				Description: "Date that meeting should take place; ex: 01/02/2024",
+				Name:        "date-times",
+				Description: "List of date/time options seperated by a comma. (format: 2024-03-05T08:00:00).",
+				Required:    true,
+			},
+			{
+				Type:        discordgo.ApplicationCommandOptionInteger,
+				Name:        "poll-duration",
+				Description: "Duration of the poll.",
 				Required:    true,
 			},
 		},
