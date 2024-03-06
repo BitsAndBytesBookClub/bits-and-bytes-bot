@@ -2,7 +2,7 @@ package discord
 
 import "github.com/bwmarrin/discordgo"
 
-var Commands = []*discordgo.ApplicationCommand{
+var commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "calender-poll",
 		Description: "Creates a new calender poll",

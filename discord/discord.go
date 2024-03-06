@@ -33,7 +33,7 @@ func (botSession *Bot) StartDiscordBot() error {
 	}
 
 	slog.Info("botSession bot generating commands...")
-	for _, v := range Commands {
+	for _, v := range commands {
 		_, err := botSession.ApplicationCommandCreate(botSession.State.User.ID, "1214625037244432465", v)
 		if err != nil {
 			slog.Error("Cannot creating command", "name", v.Name, "error", err)
@@ -55,29 +55,29 @@ func (botSession *Bot) AddDiscordHandlers(state *models.State) {
 	botSession.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
-	botSession.AddHandler(MessageCreate)
+	botSession.AddHandler(messageCreate)
 	botSession.Identify.Intents = discordgo.IntentsGuildMessages
 	botSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
 		fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
 
 		if i.Type == discordgo.InteractionMessageComponent && i.MessageComponentData().CustomID == "vote_meeting_time" {
-			InsertEmailForVoting(s, i)
+			insertEmailForVoting(s, i)
 		} else if i.Type == discordgo.InteractionModalSubmit {
 			email := i.ModalSubmitData().Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
 			state.Emails = append(state.Emails, email)
 
 			slog.Info("email added to responses", "email", email)
 
-			VoteForMeeting(s, i, state)
+			voteForMeeting(s, i, state)
 		} else if i.Type == discordgo.InteractionMessageComponent && i.MessageComponentData().CustomID == "date_selection" {
 			date := i.MessageComponentData().Values[0]
 			state.Votes[date] = state.Votes[date] + 1
 
 			slog.Info("vote cast for next meeting", "date", date, "voteCount", state.Votes[date])
 
-			CompleteVoting(s, i)
-		} else if h, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
+			completeVoting(s, i)
+		} else if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
 			state.PollDuration = time.Duration(i.ApplicationCommandData().Options[2].IntValue()) * time.Second
 			state.Dates = strings.Split(i.ApplicationCommandData().Options[1].StringValue(), ",")
 			state.Votes = make(map[string]int, len(state.Dates))

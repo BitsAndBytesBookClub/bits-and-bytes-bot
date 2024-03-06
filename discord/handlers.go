@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 	"calender-poll": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		data := i.ApplicationCommandData()
 		if data.Name != "calender-poll" {
@@ -71,7 +71,7 @@ var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 	},
 }
 
-func InsertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	modal := discordgo.ModalSubmitInteractionData{
 		CustomID: "user_email_input",
 		Components: []discordgo.MessageComponent{
@@ -101,7 +101,7 @@ func InsertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	}
 }
 
-func VoteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state *models.State) {
+func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state *models.State) {
 	if i.Type != discordgo.InteractionModalSubmit {
 		slog.Warn("not an interaction message component", "interaction", discordgo.InteractionMessageComponent)
 		return
@@ -148,7 +148,7 @@ func VoteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state 
 	}
 }
 
-func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	slog.Info("message received", "message", m.Content)
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -169,7 +169,7 @@ func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func CompleteVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func completeVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
