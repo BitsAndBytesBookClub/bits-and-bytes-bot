@@ -12,12 +12,19 @@ type State struct {
 
 func NewState() *State {
 	state := State{StartPollTimer: make(chan bool, 1)}
-	state.StartPollTimer <- true
+	state.StartPollTimer <- false
 
 	return &state
 }
 
 func (state *State) ResetState() {
-	state = &State{StartPollTimer: make(chan bool, 1)}
-	state.StartPollTimer <- true
+	state.Dates = nil
+	state.Emails = nil
+	state.Votes = make(map[string]int)
+
+	state.PollDuration = 0
+
+	close(state.StartPollTimer)
+	state.StartPollTimer = make(chan bool, 1)
+	state.StartPollTimer <- false
 }

@@ -115,6 +115,10 @@ func PollFinished(state *models.State) {
 
 					slog.Info("resetting state")
 					state.ResetState()
+
+					fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
+					fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
+					fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
 				})
 			}
 		}
