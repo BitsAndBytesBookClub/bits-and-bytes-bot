@@ -1,15 +1,16 @@
-package main
+package discord
 
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/devanbenz/bits-and-bytes-bot/models"
 	"log/slog"
 	"regexp"
 	"strings"
 	"time"
 )
 
-var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 	"calender-poll": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		data := i.ApplicationCommandData()
 		if data.Name != "calender-poll" {
@@ -70,7 +71,7 @@ var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 	},
 }
 
-func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func InsertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	modal := discordgo.ModalSubmitInteractionData{
 		CustomID: "user_email_input",
 		Components: []discordgo.MessageComponent{
@@ -100,7 +101,7 @@ func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	}
 }
 
-func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state State) {
+func VoteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state *models.State) {
 	if i.Type != discordgo.InteractionModalSubmit {
 		slog.Warn("not an interaction message component", "interaction", discordgo.InteractionMessageComponent)
 		return
@@ -147,7 +148,7 @@ func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state 
 	}
 }
 
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	slog.Info("message received", "message", m.Content)
 	if m.Author.ID == s.State.User.ID {
 		return
@@ -168,7 +169,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func completeVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func CompleteVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{

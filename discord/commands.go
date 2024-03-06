@@ -1,8 +1,8 @@
-package main
+package discord
 
 import "github.com/bwmarrin/discordgo"
 
-var commands = []*discordgo.ApplicationCommand{
+var Commands = []*discordgo.ApplicationCommand{
 	{
 		Name:        "calender-poll",
 		Description: "Creates a new calender poll",
