@@ -41,6 +41,8 @@ func (botSession *Bot) StartDiscordBot() error {
 		}
 	}
 
+	slog.Info("discord bot listening...")
+
 	return nil
 }
 

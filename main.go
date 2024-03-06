@@ -24,8 +24,6 @@ func main() {
 	}
 	defer bot.CloseDiscordBot()
 
-	slog.Info("discord bot listening...")
-
 	discord.PollFinished(state)
 	discord.TerminateOnSignal()
 }
