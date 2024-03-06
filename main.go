@@ -1,13 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"github.com/bwmarrin/discordgo"
 	"github.com/devanbenz/bits-and-bytes-bot/discord"
 	"github.com/devanbenz/bits-and-bytes-bot/models"
 	"github.com/joho/godotenv"
 	"log/slog"
-	"os"
 )
 
 func main() {
@@ -18,18 +15,14 @@ func main() {
 	}
 
 	state := models.NewState()
+	bot := discord.NewDiscordBot()
 
-	botSession, err := discordgo.New(fmt.Sprintf("Bot %s", os.Getenv("DISCORD_API_SECRET")))
-	if err != nil {
-		slog.Error("error creating botSession api connection", err)
-		return
-	}
-
-	discord.AddDiscordHandlers(botSession, state)
-	if err = discord.StartDiscordBot(botSession); err != nil {
+	bot.AddDiscordHandlers(state)
+	if err = bot.StartDiscordBot(); err != nil {
 		slog.Error("error opening botSession api connection", "error", err)
 		return
 	}
+	defer bot.CloseDiscordBot()
 
 	slog.Info("discord bot listening...")
 

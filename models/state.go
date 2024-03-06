@@ -17,7 +17,7 @@ func NewState() *State {
 	return &state
 }
 
-func ResetState(state *State) {
+func (state *State) ResetState() {
 	state = &State{StartPollTimer: make(chan bool, 1)}
 	state.StartPollTimer <- true
 }

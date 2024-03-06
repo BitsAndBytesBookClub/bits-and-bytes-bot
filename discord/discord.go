@@ -13,17 +13,24 @@ import (
 	"time"
 )
 
-func StartDiscordBot(botSession *discordgo.Session) error {
+type Bot struct {
+	*discordgo.Session
+}
+
+func NewDiscordBot() *Bot {
+	botSession, err := discordgo.New(fmt.Sprintf("Bot %s", os.Getenv("DISCORD_API_SECRET")))
+	if err != nil {
+		slog.Error("error creating botSession api connection", err)
+	}
+
+	return &Bot{botSession}
+}
+
+func (botSession *Bot) StartDiscordBot() error {
 	if err := botSession.Open(); err != nil {
 		slog.Error("error opening websocket connection", err)
 		return fmt.Errorf("error opening websocket connection %s", err)
 	}
-	defer func(discord *discordgo.Session) {
-		err := discord.Close()
-		if err != nil {
-			slog.Error("error closing botSession api", err)
-		}
-	}(botSession)
 
 	slog.Info("botSession bot generating commands...")
 	for _, v := range Commands {
@@ -37,7 +44,14 @@ func StartDiscordBot(botSession *discordgo.Session) error {
 	return nil
 }
 
-func AddDiscordHandlers(botSession *discordgo.Session, state *models.State) {
+func (botSession *Bot) CloseDiscordBot() {
+	err := botSession.Close()
+	if err != nil {
+		slog.Error("error closing botSession api", err)
+	}
+}
+
+func (botSession *Bot) AddDiscordHandlers(state *models.State) {
 	botSession.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
@@ -97,7 +111,8 @@ func PollFinished(state *models.State) {
 					fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
 					fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
 
-					models.ResetState(state)
+					slog.Info("resetting state")
+					state.ResetState()
 				})
 			}
 		}
