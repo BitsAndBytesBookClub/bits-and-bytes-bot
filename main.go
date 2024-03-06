@@ -109,6 +109,8 @@ func main() {
 				slog.Info("poll timer has been enabled", "enabled", state.StartPollTimer, "duration", state.PollDuration)
 				time.AfterFunc(state.PollDuration, func() {
 					slog.Info("sending payload", "emails", state.Emails, "dates", state.Dates, "votes", state.Votes)
+					// TODO: Send data to data store and calendly API
+					// TODO: Create a discord event when poll finishes
 					fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
 					fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
 					fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
