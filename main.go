@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/devanbenz/bits-and-bytes-bot/discord"
-	"github.com/devanbenz/bits-and-bytes-bot/models"
+	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"github.com/joho/godotenv"
 	"log/slog"
 )
@@ -14,7 +14,7 @@ func main() {
 		return
 	}
 
-	state := models.NewState()
+	state := state.NewState()
 	bot := discord.NewDiscordBot()
 
 	bot.AddDiscordHandlers(state)
