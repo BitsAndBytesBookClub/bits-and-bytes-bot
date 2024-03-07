@@ -8,3 +8,6 @@ Discord bot for bits &amp; bytes book club
   - You will need to set up the `bot` scope and `Send Messages`, `Use Slash Commands`, and `Read Messages/View Channels` permissions under the Oauth2 settings
 - TODO: SETUP DOCKER COMPOSE WITH PG DB
 - run `ENV=local go run .` to start bot
+
+# Docker
+You can build a docker image by running the `task docker-build` command.
