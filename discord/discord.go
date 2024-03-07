@@ -60,9 +60,6 @@ func (botSession *Bot) AddDiscordHandlers(state *models.State) {
 	botSession.AddHandler(messageCreate)
 	botSession.Identify.Intents = discordgo.IntentsGuildMessages
 	botSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
-		fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
-
 		if i.Type == discordgo.InteractionMessageComponent && i.MessageComponentData().CustomID == "vote_meeting_time" {
 			insertEmailForVoting(s, i)
 		} else if i.Type == discordgo.InteractionModalSubmit {
@@ -79,7 +76,7 @@ func (botSession *Bot) AddDiscordHandlers(state *models.State) {
 			slog.Info("vote cast for next meeting", "date", date, "voteCount", state.Votes[date])
 
 			completeVoting(s, i)
-		} else if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
+		} else if i.ApplicationCommandData().Name == "calender-poll" {
 			state.PollDuration = time.Duration(i.ApplicationCommandData().Options[2].IntValue()) * time.Second
 			state.Dates = strings.Split(i.ApplicationCommandData().Options[1].StringValue(), ",")
 			state.Votes = make(map[string]int, len(state.Dates))
@@ -94,7 +91,7 @@ func (botSession *Bot) AddDiscordHandlers(state *models.State) {
 				state.StartPollTimer <- true
 			}
 
-			h(s, i)
+			GenerateCalenderPoll(s, i)
 		}
 	})
 }
