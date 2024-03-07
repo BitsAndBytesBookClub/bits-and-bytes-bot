@@ -1,8 +1,9 @@
-package main
+package discord
 
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/devanbenz/bits-and-bytes-bot/models"
 	"log/slog"
 	"regexp"
 	"strings"
@@ -95,12 +96,12 @@ func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) 
 		},
 	})
 	if err != nil {
-		slog.Error("error handling modal voting", "error", err)
+		slog.Error("error handling voting button", "error", err)
 		return
 	}
 }
 
-func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state State) {
+func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state *models.State) {
 	if i.Type != discordgo.InteractionModalSubmit {
 		slog.Warn("not an interaction message component", "interaction", discordgo.InteractionMessageComponent)
 		return
@@ -129,19 +130,6 @@ func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state 
 				},
 			},
 		},
-		//&discordgo.ActionsRow{
-		//	Components: []discordgo.MessageComponent{
-		//		discordgo.Button{
-		//			Label:    "Submit",
-		//			Style:    discordgo.PrimaryButton,
-		//			Disabled: false,
-		//			Emoji: discordgo.ComponentEmoji{
-		//				Name: "✅",
-		//			},
-		//			CustomID: "submit_vote_for_meeting",
-		//		},
-		//	},
-		//},
 	}
 
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -150,11 +138,12 @@ func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state 
 			CustomID:   "meeting_vote_form",
 			Title:      "Vote for meeting time",
 			Content:    "Please select an available meeting time",
+			Flags:      discordgo.MessageFlagsEphemeral,
 			Components: form,
 		},
 	})
 	if err != nil {
-		slog.Error("error handling modal voting", "error", err)
+		slog.Error("error handling date selection", "error", err)
 		return
 	}
 }
@@ -186,6 +175,7 @@ func completeVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		Data: &discordgo.InteractionResponseData{
 			Title:   "Post voting",
 			Content: "Thank you for voting!",
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 	if err != nil {
