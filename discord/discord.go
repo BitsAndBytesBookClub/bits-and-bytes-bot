@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/devanbenz/bits-and-bytes-bot/database"
 	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"log"
 	"log/slog"
@@ -15,15 +16,16 @@ import (
 
 type Bot struct {
 	*discordgo.Session
+	db database.Db
 }
 
-func NewDiscordBot() *Bot {
+func NewDiscordBot(db database.Db) *Bot {
 	botSession, err := discordgo.New(fmt.Sprintf("Bot %s", os.Getenv("DISCORD_API_SECRET")))
 	if err != nil {
 		slog.Error("error creating botSession api connection", err)
 	}
 
-	return &Bot{botSession}
+	return &Bot{botSession, db}
 }
 
 func (botSession *Bot) StartDiscordBot() error {
