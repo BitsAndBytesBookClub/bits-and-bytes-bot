@@ -11,3 +11,6 @@ Discord bot for bits &amp; bytes book club
 
 # Docker
 You can build a docker image by running the `task docker-build` command.
+
+After creating and filling a .env with the variables mentioned above, you can
+also spin up a full environment with `docker-compose up`
