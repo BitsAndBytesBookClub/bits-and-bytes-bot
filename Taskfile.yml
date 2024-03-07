@@ -6,5 +6,5 @@ tasks:
       TAGNAME: bits-and-bytes-bot:latest
     cmds:
       - sudo docker build -t {{.TAGNAME}} .
-      - printf "\nYou can run a container with the following command\n\tsudo docker run -v $(pwd)/.env:/.env {{.TAGNAME}}\n\n"
+      - printf "\nYou can run a container with the following command\n\tsudo docker run -e ENV=local -v $(pwd)/.env:/.env {{.TAGNAME}}\n\n"
     silent: true
