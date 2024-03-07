@@ -18,6 +18,7 @@ func NewPostgresDb() *PostgresDb {
 		// lets just panic for now - don't want the application to run without a db connection
 		panic(err)
 	}
+	slog.Info("connected to postgres...")
 	return &PostgresDb{
 		conn,
 	}

@@ -6,21 +6,18 @@ import (
 	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"github.com/joho/godotenv"
 	"log/slog"
+	"os"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		slog.Error("Error loading .env file", err)
-		return
-	}
+	bootStrapLocalDev()
 
 	state := state.NewState()
 	pgDb := database.NewPostgresDb()
 	bot := discord.NewDiscordBot(pgDb)
 
 	bot.AddDiscordHandlers(state)
-	if err = bot.StartDiscordBot(); err != nil {
+	if err := bot.StartDiscordBot(); err != nil {
 		slog.Error("error opening botSession api connection", "error", err)
 		return
 	}
@@ -29,4 +26,15 @@ func main() {
 
 	discord.PollFinished(state)
 	discord.TerminateOnSignal()
+}
+
+func bootStrapLocalDev() {
+	if os.Getenv("ENV") == "local" {
+		err := godotenv.Load()
+		if err != nil {
+			slog.Error("Error loading .env file", err)
+			return
+		}
+	}
+	return
 }
