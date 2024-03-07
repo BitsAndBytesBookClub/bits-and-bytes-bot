@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  docker-build:
+    vars:
+      TAGNAME: bits-and-bytes-bot:latest
+    cmds:
+      - sudo docker build -t {{.TAGNAME}} .
+      - printf "\nYou can run a container with the following command\n\tsudo docker run -v $(pwd)/.env:/.env {{.TAGNAME}}\n\n"
+    silent: true
