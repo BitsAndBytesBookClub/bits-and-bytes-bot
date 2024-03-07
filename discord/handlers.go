@@ -10,65 +10,63 @@ import (
 	"time"
 )
 
-var commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-	"calender-poll": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-		data := i.ApplicationCommandData()
-		if data.Name != "calender-poll" {
-			slog.Warn("not calender-poll", "data", data.Name)
-			return
-		}
+func GenerateCalenderPoll(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	data := i.ApplicationCommandData()
+	if data.Name != "calender-poll" {
+		slog.Warn("not calender-poll", "data", data.Name)
+		return
+	}
 
-		eventName := data.Options[0].StringValue()
-		slog.Info("creating a new poll", "eventName", eventName, "dates", data.Options[1].StringValue())
-		dates := strings.Split(data.Options[1].StringValue(), ",")
+	eventName := data.Options[0].StringValue()
+	slog.Info("creating a new poll", "eventName", eventName, "dates", data.Options[1].StringValue())
+	dates := strings.Split(data.Options[1].StringValue(), ",")
 
-		for _, v := range dates {
-			// 2024-03-15T10:00:00,2024-03-15T11:00:00,2024-03-15T12:00:00
-			const shortForm = "2006-01-02T15:04:05"
-			_, err := time.Parse(shortForm, v)
-			if err != nil {
-				slog.Error("cannot parse date times", "error", err)
-				if err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseChannelMessageWithSource,
-					Data: &discordgo.InteractionResponseData{
-						Content: "please provide a proper list of dates!",
-					},
+	for _, v := range dates {
+		// 2024-03-15T10:00:00,2024-03-15T11:00:00,2024-03-15T12:00:00
+		const shortForm = "2006-01-02T15:04:05"
+		_, err := time.Parse(shortForm, v)
+		if err != nil {
+			slog.Error("cannot parse date times", "error", err)
+			if err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "please provide a proper list of dates!",
 				},
-				); err != nil {
-					slog.Error("error performing calender-poll interaction", err)
-					return
-				}
+			},
+			); err != nil {
+				slog.Error("error performing calender-poll interaction", err)
+				return
 			}
 		}
+	}
 
-		components := []discordgo.MessageComponent{
-			&discordgo.ActionsRow{
-				Components: []discordgo.MessageComponent{
-					&discordgo.Button{
-						Label:    "Vote for meeting time",
-						Style:    discordgo.PrimaryButton,
-						Disabled: false,
-						Emoji: discordgo.ComponentEmoji{
-							Name: "🗓️",
-						},
-						CustomID: "vote_meeting_time",
+	components := []discordgo.MessageComponent{
+		&discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				&discordgo.Button{
+					Label:    "Vote for meeting time",
+					Style:    discordgo.PrimaryButton,
+					Disabled: false,
+					Emoji: discordgo.ComponentEmoji{
+						Name: "🗓️",
 					},
+					CustomID: "vote_meeting_time",
 				},
 			},
-		}
-
-		if err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content:    fmt.Sprintf("Please vote for a meeting time for **%s**", eventName),
-				Components: components,
-			},
 		},
-		); err != nil {
-			slog.Error("error performing calender-poll interaction", "error", err)
-			return
-		}
+	}
+
+	if err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content:    fmt.Sprintf("Please vote for a meeting time for **%s**", eventName),
+			Components: components,
+		},
 	},
+	); err != nil {
+		slog.Error("error performing calender-poll interaction", "error", err)
+		return
+	}
 }
 
 func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
