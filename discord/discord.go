@@ -3,7 +3,7 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/devanbenz/bits-and-bytes-bot/models"
+	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"log"
 	"log/slog"
 	"os"
@@ -34,7 +34,7 @@ func (botSession *Bot) StartDiscordBot() error {
 
 	slog.Info("botSession bot generating commands...")
 	for _, v := range commands {
-		_, err := botSession.ApplicationCommandCreate(botSession.State.User.ID, "1214625037244432465", v)
+		_, err := botSession.ApplicationCommandCreate(botSession.State.User.ID, os.Getenv("GUILD_ID"), v)
 		if err != nil {
 			slog.Error("Cannot creating command", "name", v.Name, "error", err)
 			return fmt.Errorf("error generating commands %s", err)
@@ -53,7 +53,7 @@ func (botSession *Bot) CloseDiscordBot() {
 	}
 }
 
-func (botSession *Bot) AddDiscordHandlers(state *models.State) {
+func (botSession *Bot) AddDiscordHandlers(state *state.State) {
 	botSession.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
 		log.Printf("Logged in as: %v#%v", s.State.User.Username, s.State.User.Discriminator)
 	})
@@ -96,7 +96,7 @@ func (botSession *Bot) AddDiscordHandlers(state *models.State) {
 	})
 }
 
-func PollFinished(state *models.State) {
+func PollFinished(state *state.State) {
 	go func() {
 		for {
 			enabled := <-state.StartPollTimer

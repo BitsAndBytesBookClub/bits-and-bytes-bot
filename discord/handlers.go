@@ -3,7 +3,7 @@ package discord
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"github.com/devanbenz/bits-and-bytes-bot/models"
+	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"log/slog"
 	"regexp"
 	"strings"
@@ -99,7 +99,7 @@ func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	}
 }
 
-func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state *models.State) {
+func voteForMeeting(s *discordgo.Session, i *discordgo.InteractionCreate, state *state.State) {
 	if i.Type != discordgo.InteractionModalSubmit {
 		slog.Warn("not an interaction message component", "interaction", discordgo.InteractionMessageComponent)
 		return
