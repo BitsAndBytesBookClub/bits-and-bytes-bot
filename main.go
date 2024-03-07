@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/devanbenz/bits-and-bytes-bot/database"
 	"github.com/devanbenz/bits-and-bytes-bot/discord"
 	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"github.com/joho/godotenv"
@@ -12,13 +13,15 @@ func main() {
 	bootStrapLocalDev()
 
 	state := state.NewState()
-	bot := discord.NewDiscordBot()
+	pgDb := database.NewPostgresDb()
+	bot := discord.NewDiscordBot(pgDb)
 
 	bot.AddDiscordHandlers(state)
 	if err := bot.StartDiscordBot(); err != nil {
 		slog.Error("error opening botSession api connection", "error", err)
 		return
 	}
+	defer pgDb.CloseDb()
 	defer bot.CloseDiscordBot()
 
 	discord.PollFinished(state)
