@@ -93,7 +93,7 @@ func (botSession *Bot) AddDiscordHandlers(state *state.State) {
 				state.StartPollTimer <- true
 			}
 
-			GenerateCalenderPoll(s, i)
+			GenerateCalenderPoll(s, i, state)
 		}
 	})
 }
