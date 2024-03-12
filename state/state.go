@@ -5,6 +5,7 @@ import "time"
 type State struct {
 	Dates          []string
 	Emails         []string
+	Voters         []string
 	Votes          map[string]int
 	PollDuration   time.Duration
 	StartPollTimer chan bool
@@ -20,6 +21,7 @@ func NewState() *State {
 func (state *State) ResetState() {
 	state.Dates = nil
 	state.Emails = nil
+	state.Voters = nil
 	state.Votes = make(map[string]int)
 
 	state.PollDuration = 0

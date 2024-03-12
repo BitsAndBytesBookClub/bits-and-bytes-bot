@@ -2,12 +2,13 @@ package discord
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"log/slog"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/devanbenz/bits-and-bytes-bot/state"
 )
 
 func GenerateCalenderPoll(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -93,6 +94,7 @@ func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) 
 			Components: modal.Components,
 		},
 	})
+
 	if err != nil {
 		slog.Error("error handling voting button", "error", err)
 		return
@@ -169,7 +171,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 func completeVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
 			Title:   "Post voting",
 			Content: "Thank you for voting!",

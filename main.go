@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log/slog"
+	"os"
+
 	"github.com/devanbenz/bits-and-bytes-bot/database"
 	"github.com/devanbenz/bits-and-bytes-bot/discord"
 	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"github.com/joho/godotenv"
-	"log/slog"
-	"os"
 )
 
 func main() {
