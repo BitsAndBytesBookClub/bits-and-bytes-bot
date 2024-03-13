@@ -2,16 +2,18 @@ package discord
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/devanbenz/bits-and-bytes-bot/database"
-	"github.com/devanbenz/bits-and-bytes-bot/state"
 	"log"
 	"log/slog"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/bwmarrin/discordgo"
+	"github.com/devanbenz/bits-and-bytes-bot/database"
+	"github.com/devanbenz/bits-and-bytes-bot/state"
 )
 
 type Bot struct {
@@ -63,9 +65,45 @@ func (botSession *Bot) AddDiscordHandlers(state *state.State) {
 	botSession.Identify.Intents = discordgo.IntentsGuildMessages
 	botSession.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if i.Type == discordgo.InteractionMessageComponent && i.MessageComponentData().CustomID == "vote_meeting_time" {
+			user := i.Member.User
+
+			if slices.Contains(state.Voters, user.Username) {
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "You have already voted!",
+						Flags:   discordgo.MessageFlagsEphemeral,
+					},
+				})
+
+				if err != nil {
+					slog.Error("error handling voting button", "error", err)
+				}
+
+				return
+			}
+
 			insertEmailForVoting(s, i)
 		} else if i.Type == discordgo.InteractionModalSubmit {
 			email := i.ModalSubmitData().Components[0].(*discordgo.ActionsRow).Components[0].(*discordgo.TextInput).Value
+
+			if slices.Contains(state.Emails, email) {
+				slog.Info("email already exists", "email", email)
+				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: "This email already voted!",
+						Flags:   discordgo.MessageFlagsEphemeral,
+					},
+				})
+
+				if err != nil {
+					slog.Error("error performing email interaction", err)
+				}
+
+				return
+			}
+
 			state.Emails = append(state.Emails, email)
 
 			slog.Info("email added to responses", "email", email)
@@ -74,11 +112,12 @@ func (botSession *Bot) AddDiscordHandlers(state *state.State) {
 		} else if i.Type == discordgo.InteractionMessageComponent && i.MessageComponentData().CustomID == "date_selection" {
 			date := i.MessageComponentData().Values[0]
 			state.Votes[date] = state.Votes[date] + 1
+			state.Voters = append(state.Voters, i.Member.User.Username)
 
 			slog.Info("vote cast for next meeting", "date", date, "voteCount", state.Votes[date])
 
 			completeVoting(s, i)
-		} else if i.ApplicationCommandData().Name == "calender-poll" {
+		} else if i.ApplicationCommandData().Name == "calendar-poll" {
 			state.PollDuration = time.Duration(i.ApplicationCommandData().Options[2].IntValue()) * time.Second
 			state.Dates = strings.Split(i.ApplicationCommandData().Options[1].StringValue(), ",")
 			state.Votes = make(map[string]int, len(state.Dates))
@@ -110,14 +149,16 @@ func PollFinished(state *state.State) {
 					// TODO: Create a botSession event when poll finishes
 					fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
 					fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
-					fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
+					fmt.Println(fmt.Sprintf("votes: %v", state.Votes))
+					fmt.Println(fmt.Sprintf("voters: %s", state.Voters))
 
 					slog.Info("resetting state")
 					state.ResetState()
 
 					fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
 					fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
-					fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
+					fmt.Println(fmt.Sprintf("votes: %v", state.Votes))
+					fmt.Println(fmt.Sprintf("voters: %s", state.Voters))
 				})
 			}
 		}
