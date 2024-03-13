@@ -110,14 +110,14 @@ func PollFinished(state *state.State) {
 					// TODO: Create a botSession event when poll finishes
 					fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
 					fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
-					fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
+					fmt.Println(fmt.Sprintf("votes: %v", state.Votes))
 
 					slog.Info("resetting state")
 					state.ResetState()
 
 					fmt.Println(fmt.Sprintf("emails: %s", state.Emails))
 					fmt.Println(fmt.Sprintf("dates: %s", state.Dates))
-					fmt.Println(fmt.Sprintf("votes: %s", state.Votes))
+					fmt.Println(fmt.Sprintf("votes: %v", state.Votes))
 				})
 			}
 		}
