@@ -7,7 +7,7 @@ services:
       - postgres
     env_file: ./.env
     environment:
-      POSTGRES_URI: "postgresql://bitsAndBytes:AVeryLongAndSecurePassword@postgres:5432/bitsAndBytes"
+      POSTGRES_URI: "postgresql://bitsAndBytes:AVeryLongAndSecurePassword@postgres:5432/bitsAndBytes?sslmode=disable"
   postgres:
     image: postgres:16.2
     environment:
