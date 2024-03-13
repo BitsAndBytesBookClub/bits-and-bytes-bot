@@ -117,7 +117,7 @@ func (botSession *Bot) AddDiscordHandlers(state *state.State) {
 			slog.Info("vote cast for next meeting", "date", date, "voteCount", state.Votes[date])
 
 			completeVoting(s, i)
-		} else if i.ApplicationCommandData().Name == "calender-poll" {
+		} else if i.ApplicationCommandData().Name == "calendar-poll" {
 			state.PollDuration = time.Duration(i.ApplicationCommandData().Options[2].IntValue()) * time.Second
 			state.Dates = strings.Split(i.ApplicationCommandData().Options[1].StringValue(), ",")
 			state.Votes = make(map[string]int, len(state.Dates))
@@ -132,7 +132,7 @@ func (botSession *Bot) AddDiscordHandlers(state *state.State) {
 				state.StartPollTimer <- true
 			}
 
-			GenerateCalenderPoll(s, i)
+			GenerateCalendarPoll(s, i)
 		}
 	})
 }

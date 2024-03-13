@@ -11,10 +11,10 @@ import (
 	"github.com/devanbenz/bits-and-bytes-bot/state"
 )
 
-func GenerateCalenderPoll(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func GenerateCalendarPoll(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	data := i.ApplicationCommandData()
-	if data.Name != "calender-poll" {
-		slog.Warn("not calender-poll", "data", data.Name)
+	if data.Name != "calendar-poll" {
+		slog.Warn("not calendar-poll", "data", data.Name)
 		return
 	}
 
@@ -35,7 +35,7 @@ func GenerateCalenderPoll(s *discordgo.Session, i *discordgo.InteractionCreate) 
 				},
 			},
 			); err != nil {
-				slog.Error("error performing calender-poll interaction", err)
+				slog.Error("error performing calendar-poll interaction", err)
 				return
 			}
 		}
@@ -65,7 +65,7 @@ func GenerateCalenderPoll(s *discordgo.Session, i *discordgo.InteractionCreate) 
 		},
 	},
 	); err != nil {
-		slog.Error("error performing calender-poll interaction", "error", err)
+		slog.Error("error performing calendar-poll interaction", "error", err)
 		return
 	}
 }

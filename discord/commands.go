@@ -4,8 +4,8 @@ import "github.com/bwmarrin/discordgo"
 
 var commands = []*discordgo.ApplicationCommand{
 	{
-		Name:        "calender-poll",
-		Description: "Creates a new calender poll",
+		Name:        "calendar-poll",
+		Description: "Creates a new calendar poll",
 		Options: []*discordgo.ApplicationCommandOption{
 			{
 				Type:        discordgo.ApplicationCommandOptionString,
