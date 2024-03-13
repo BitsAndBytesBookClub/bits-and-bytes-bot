@@ -11,7 +11,7 @@ import (
 	"github.com/devanbenz/bits-and-bytes-bot/state"
 )
 
-func GenerateCalendarPoll(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func GenerateCalenderPoll(s *discordgo.Session, i *discordgo.InteractionCreate, st *state.State) {
 	data := i.ApplicationCommandData()
 	if data.Name != "calendar-poll" {
 		slog.Warn("not calendar-poll", "data", data.Name)
@@ -41,18 +41,20 @@ func GenerateCalendarPoll(s *discordgo.Session, i *discordgo.InteractionCreate) 
 		}
 	}
 
+	btn := &discordgo.Button{
+		Label:    "Vote for meeting time",
+		Style:    discordgo.PrimaryButton,
+		Disabled: false,
+		Emoji: discordgo.ComponentEmoji{
+			Name: "🗓️",
+		},
+		CustomID: "vote_meeting_time",
+	}
+
 	components := []discordgo.MessageComponent{
 		&discordgo.ActionsRow{
 			Components: []discordgo.MessageComponent{
-				&discordgo.Button{
-					Label:    "Vote for meeting time",
-					Style:    discordgo.PrimaryButton,
-					Disabled: false,
-					Emoji: discordgo.ComponentEmoji{
-						Name: "🗓️",
-					},
-					CustomID: "vote_meeting_time",
-				},
+				btn,
 			},
 		},
 	}
@@ -68,6 +70,20 @@ func GenerateCalendarPoll(s *discordgo.Session, i *discordgo.InteractionCreate) 
 		slog.Error("error performing calendar-poll interaction", "error", err)
 		return
 	}
+
+	time.AfterFunc(st.PollDuration, func() {
+		btn.Disabled = true
+		btn.Label = "Voting is closed"
+
+		_, err := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+			Components: &components,
+		})
+
+		if err != nil {
+			slog.Error("error updating calender-poll interaction", "error", err)
+			return
+		}
+	})
 }
 
 func insertEmailForVoting(s *discordgo.Session, i *discordgo.InteractionCreate) {
